@@ -6,6 +6,18 @@
 #include <string>
 #include <string_view>
 
+struct playerMove {
+	std::string instruction;
+	std::string row;
+	std::string col;
+};
+
+struct parsedPlayerMove {
+	char instruction;
+	int row;
+	int col;
+};
+
 class mineGame {
 private:
 	mineDifficulty::difficultyEnum m_difficulty;
@@ -15,15 +27,24 @@ private:
 
 	mineBoard setupBoard(mineDifficulty::setupValues setupValues);
 	mineBoard m_gameBoard;
+	void renderGameState();
 	void printGameHeader();
 	void printGameInstructions();
-	void getMove();
-	bool validMoveInput(std::string_view);
+	parsedPlayerMove getMove();
+	playerMove parseUserInput(std::string_view);
+	parsedPlayerMove parsePlayerMove(playerMove);
+	bool validMoveInput(playerMove);
 	bool validateInstruction(const std::string&);
 	bool validateRow(const std::string&);
-	bool validateCol(std::string_view);	
+	bool validateCol(std::string_view);
 	bool isValidColChar(std::string_view);
 	bool isInCharRange(const char, const char, const char);
+	void executePlayerMove(parsedPlayerMove);
+
+	std::map<char, void(mineGame::*)(int, int)> m_instructionDispatch;
+	void openTile(int, int);
+	void flagTile(int, int);
+	void qmarkTile(int, int);
 
 public:
 	mineGame(mineDifficulty::difficultyEnum difficulty) : m_difficulty{ difficulty }
@@ -56,7 +77,7 @@ public:
 		{
 			// ERR
 		}
-		
+
 		m_totalMineCount = mineDifficulty::MINECOUNT.at(difficulty);
 		m_theoreticalMinesRemaining = m_totalMineCount;
 		mineDifficulty::setupValues s{
@@ -65,7 +86,14 @@ public:
 			m_totalMineCount
 		};
 
+		// Initialize the move instruction dispatch
+		m_instructionDispatch['o'] = &mineGame::openTile;
+		m_instructionDispatch['f'] = &mineGame::flagTile;
+		m_instructionDispatch['q'] = &mineGame::qmarkTile;
+
 		m_gameBoard = setupBoard(s);
 	}
-	void getFirstMove();
+	parsedPlayerMove getFirstMove();
+	void placeMines(parsedPlayerMove);
+	void runGameLoop();
 };

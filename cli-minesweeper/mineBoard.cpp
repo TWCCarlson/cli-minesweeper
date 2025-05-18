@@ -13,12 +13,28 @@ void mineBoard::displayBoard() {
 	}
 }
 
+std::vector<mineCell*> mineBoard::getCellPointers()
+{
+	std::vector<mineCell*> pointers;
+	pointers.reserve(m_board.size()); // Preallocate
+	for (mineCell& cell : m_board) { // Reference avoids copies
+		pointers.push_back(&cell);
+	}
+	return pointers;
+}
+
+mineCell& mineBoard::getTile(int row, int col)
+{
+	int idx{ row * m_width + col };
+	return m_board[idx];
+}
+
 void mineBoard::printBoardHeader(int colWidth) {
 	std::string buffer(3, ' ');
 	std::cout << buffer;
 	for (int x{ 0 }; x < m_width; x++) {
 		std::cout << std::setw(colWidth) << std::left
-			<< (char)(x+97);
+			<< (char)(x + 97);
 	}
 	std::cout << '\n';
 }

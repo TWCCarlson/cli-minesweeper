@@ -20,11 +20,10 @@ char mineCell::getPlayerMarkChar() {
 }
 
 char mineCell::getGameMarkChar() {
+	if (m_hasMine) { return (char)232; };
 	// If there are 0 neighbor mines the char is blank
-	if (m_numberOfNeighborMines == 0) {
-		return ' ';	
-	}
-	// Otherwise cast from into char
+	if (m_numberOfNeighborMines == 0) { return ' '; }
+	// Otherwise cast from int to char
 	return '0' + (char)m_numberOfNeighborMines;
 }
 

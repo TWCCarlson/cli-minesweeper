@@ -60,9 +60,11 @@ int main() {
 	// Create the board
 	// Create the cells
 	// Await first move
-	game.getFirstMove();
+	parsedPlayerMove firstMove{ game.getFirstMove() };
 	// Disperse mines (avoid first revealed cell)
+	game.placeMines(firstMove);
 	// Loop until game end
+	//game.runGameLoop();
 	// - All non-mine cells revealed
 	// - Mine revealed
 	return 0;

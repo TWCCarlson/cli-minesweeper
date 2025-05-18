@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <map>
 #include <set>
+#include <random>
+#include <algorithm>
 
 mineBoard mineGame::setupBoard(mineDifficulty::setupValues setupValues)
 {
@@ -15,6 +17,14 @@ mineBoard mineGame::setupBoard(mineDifficulty::setupValues setupValues)
 		setupValues.boardWidth,
 		setupValues.mineCount);
 	return board;
+}
+
+void mineGame::renderGameState()
+{
+	system("cls");
+	printGameHeader();
+	m_gameBoard.displayBoard();
+	printGameInstructions();
 }
 
 void mineGame::printGameHeader()
@@ -38,18 +48,20 @@ void mineGame::printGameInstructions()
 	std::cout << playerMarkCharMap.at(playerMark::Question) << std::endl;
 }
 
-void mineGame::getMove()
+parsedPlayerMove mineGame::getMove()
 {
-	std::cout << "Submit your move: ";
-	std::string userInput;
-	std::cin >> userInput;
-	std::cout << userInput;
-	if (mineGame::validMoveInput(userInput)) {
-		//
-	}
-	else {
-		//
-	}
+	bool gotValidMove{ false };
+	playerMove playerMove{};
+	do {
+		renderGameState();
+		std::cout << "Submit your move: ";
+		std::string userInput;
+		std::cin >> userInput;
+		playerMove = parseUserInput(userInput);
+		gotValidMove = validMoveInput(playerMove);
+	} while (!gotValidMove);
+	parsedPlayerMove pplayerMove{ parsePlayerMove(playerMove) };
+	return pplayerMove;
 }
 
 std::set<std::string> validInstructions{
@@ -58,32 +70,56 @@ std::set<std::string> validInstructions{
 	"question", "q",
 };
 
-bool mineGame::validMoveInput(std::string_view userInput)
-{
-	// valid moves are of the form <instruction><row><col>
-	// <instruction> can be open,o,flag,f,question,q
+playerMove mineGame::parseUserInput(std::string_view userInput) {
 	std::string instruction{};
 	std::string row{};
 	std::string col{};
 	int i{ 0 };
 
+	// Extract instruction: only alpha chars
 	while (i < userInput.size() and isalpha(userInput[i])) {
+		// ERR
 		instruction += userInput[i++];
 	}
-	bool validInstruction{ validateInstruction(instruction) };
 
+	// Extract row identifier: only digits
 	while (i < userInput.size() and isdigit(userInput[i])) {
+		// ERR
 		row += userInput[i++];
 	}
-	bool validRow{ validateRow(row) };
 
+	// Extract col identifier: only a single alpha char
 	while (i < userInput.size()) {
+		// ERR
 		col += userInput[i++];
 	}
-	bool validCol{ validateCol(col) };
 
-	if (!validInstruction || !validRow || !validCol) { return false; }
-	return true;
+	playerMove playerMove{
+		.instruction = instruction,
+		.row = row,
+		.col = col };
+	return playerMove;
+}
+
+parsedPlayerMove mineGame::parsePlayerMove(playerMove playerMove)
+{
+	parsedPlayerMove pPlayerMove{
+		.instruction = playerMove.instruction[0], // first char
+		.row = stoi(playerMove.row), // string->int[0-rows]
+		.col = (int)playerMove.col[0] - 'a' // char->int normalized[0-cols]
+	};
+	return pPlayerMove;
+}
+
+bool mineGame::validMoveInput(playerMove playerMove)
+{
+	// valid moves are of the form <instruction><row><col>
+	// <instruction> can be open,o,flag,f,question,q
+	bool validInstruction{ validateInstruction(playerMove.instruction) };
+	bool validRow{ validateRow(playerMove.row) };
+	bool validCol{ validateCol(playerMove.col) };
+
+	return (validInstruction && validRow && validCol);
 }
 
 static bool isEmpty(std::string_view str) {
@@ -121,12 +157,70 @@ bool mineGame::isValidColChar(std::string_view input) {
 }
 
 bool mineGame::isInCharRange(const char c, const char min, const char max) {
-	return (min < c && c < max);
+	return (min <= c && c <= max);
 }
 
-void mineGame::getFirstMove() {
-	mineGame::printGameHeader();
-	m_gameBoard.displayBoard();
-	mineGame::printGameInstructions();
-	mineGame::getMove();
+void mineGame::executePlayerMove(parsedPlayerMove ppMove)
+{
+	// Use the dispatch defined in constructor to call the action function
+	(this->*m_instructionDispatch[ppMove.instruction])(ppMove.row, ppMove.col);
+}
+
+void mineGame::openTile(int row, int col)
+{
+	m_gameBoard.getTile(row, col).openTile();
+}
+
+void mineGame::flagTile(int row, int col)
+{
+	m_gameBoard.getTile(row, col).flagTile();
+}
+
+void mineGame::qmarkTile(int row, int col)
+{
+	m_gameBoard.getTile(row, col).qmarkTile();
+}
+
+parsedPlayerMove mineGame::getFirstMove()
+{
+	// Must open one cell before mine placement
+	parsedPlayerMove ppMove{};
+	do {
+		ppMove = getMove();
+		executePlayerMove(ppMove);
+	} while (ppMove.instruction != 'o');
+	return ppMove;
+}
+
+void mineGame::placeMines(parsedPlayerMove ppMove)
+{
+	// The board stores tiles in a vector
+	// It is sufficient to randomize the order of a vector of pointers
+	// Then select the first N pointers in the shuffled vector for mines
+	std::vector<mineCell*> shuffledTiles{m_gameBoard.getCellPointers()};
+
+	// Set URBG (Uniform Random Number Generator)
+	std::random_device rd;
+	std::mt19937 urbg(rd());
+
+	// Get pointer to first move tile
+	mineCell* bannedTile{ &m_gameBoard.getTile(ppMove.row, ppMove.col) };
+
+	std::shuffle(shuffledTiles.begin(), shuffledTiles.end(), urbg);
+	int placedCount{ 0 };
+	for (int count = 0; placedCount < m_gameBoard.getMineCount(); count++) {
+		mineCell* targetTile = shuffledTiles[count];
+		// Mines should never appear under first tile opened
+		if (targetTile == bannedTile) {}
+		else { (*targetTile).placeMine(); placedCount++; }
+	}
+	renderGameState();
+}
+
+void mineGame::runGameLoop()
+{
+	/*while (true) {
+		executePlayerMove(getMove());
+		renderGameState();
+	}*/
 }

@@ -17,8 +17,13 @@ public:
 		m_height{ height },
 		m_width{ width },
 		m_numberOfMines{ mineCount },
-		m_board(height* width, mineCell()) {};
+		m_board(height* width, mineCell()) {
+	};
 	void displayBoard();
-	int getWidth() { return m_width; };
-	int getHeight() { return m_height; };
+	const std::vector<mineCell>& getBoard() { return m_board; };
+	std::vector<mineCell*> getCellPointers();
+	const int getWidth() { return m_width; };
+	const int getHeight() { return m_height; };
+	mineCell& getTile(int, int);
+	const int getMineCount() { return m_numberOfMines; };
 };
