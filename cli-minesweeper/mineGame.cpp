@@ -33,7 +33,7 @@ void mineGame::printGameHeader()
 	std::string_view difficultyText{
 		mineDifficulty::DifficultyOptions.at(static_cast<int>(m_difficulty)) };
 	std::cout << std::setw(gameWidth / 2) << std::left << difficultyText;
-	std::cout << std::setw(gameWidth / 2) << std::right << m_theoreticalMinesRemaining;
+	std::cout << std::setw(gameWidth / 2) << std::right << "Mines left: " << m_theoreticalMinesRemaining;
 	std::cout << "\n\n";
 }
 
@@ -53,7 +53,6 @@ parsedPlayerMove mineGame::getMove()
 	bool gotValidMove{ false };
 	playerMove playerMove{};
 	do {
-		renderGameState();
 		std::cout << "Submit your move: ";
 		std::string userInput;
 		std::cin >> userInput;
@@ -171,7 +170,7 @@ gameStateValues mineGame::executePlayerMove(parsedPlayerMove ppMove)
 
 gameStateValues mineGame::openTile(int row, int col)
 {
-	mineCell targetTile = m_gameBoard.getTile(row, col);
+	mineCell& targetTile = m_gameBoard.getTile(row, col);
 	if (targetTile.getPlayerVisibility()) { return gameStateValues::CONTINUE; }
 	targetTile.openTile();
 	if (targetTile.getMineState()) { return gameStateValues::LOSE; }
@@ -195,6 +194,7 @@ parsedPlayerMove mineGame::getFirstMove()
 	// Must open one cell before mine placement
 	parsedPlayerMove ppMove{};
 	do {
+		renderGameState();
 		ppMove = getMove();
 		executePlayerMove(ppMove);
 		m_uncheckedSafeTileCount--;
@@ -252,7 +252,7 @@ void mineGame::runGameLoop()
 	while (true) {
 		renderGameState();
 		gameStatusCode = executePlayerMove(getMove());
-		
+
 		if (gameStatusCode == gameStateValues::OPENTILE_SUCCESS) {
 			m_uncheckedSafeTileCount--;
 			if (m_uncheckedSafeTileCount == 0) {
