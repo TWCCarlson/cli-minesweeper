@@ -65,7 +65,7 @@ int main() {
 	game.placeMines(firstMove);
 	game.calculateTileHints();
 	// Loop until game end
-	//game.runGameLoop();
+	game.runGameLoop();
 	// - All non-mine cells revealed
 	// - Mine revealed
 	return 0;

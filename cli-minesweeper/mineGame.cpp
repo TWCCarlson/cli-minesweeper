@@ -21,7 +21,7 @@ mineBoard mineGame::setupBoard(mineDifficulty::setupValues setupValues)
 
 void mineGame::renderGameState()
 {
-	//system("cls");
+	system("cls");
 	printGameHeader();
 	m_gameBoard.displayBoard();
 	printGameInstructions();
@@ -61,6 +61,7 @@ parsedPlayerMove mineGame::getMove()
 		gotValidMove = validMoveInput(playerMove);
 	} while (!gotValidMove);
 	parsedPlayerMove pplayerMove{ parsePlayerMove(playerMove) };
+	std::cout << "[" << playerMove.row << ", " << playerMove.col << "]";
 	return pplayerMove;
 }
 
@@ -160,25 +161,33 @@ bool mineGame::isInCharRange(const char c, const char min, const char max) {
 	return (min <= c && c <= max);
 }
 
-void mineGame::executePlayerMove(parsedPlayerMove ppMove)
+gameStateValues mineGame::executePlayerMove(parsedPlayerMove ppMove)
 {
 	// Use the dispatch defined in constructor to call the action function
-	(this->*m_instructionDispatch[ppMove.instruction])(ppMove.row, ppMove.col);
+	gameStateValues result{ gameStateValues::CONTINUE };
+	result = (this->*m_instructionDispatch[ppMove.instruction])(ppMove.row, ppMove.col);
+	return result;
 }
 
-void mineGame::openTile(int row, int col)
+gameStateValues mineGame::openTile(int row, int col)
 {
-	m_gameBoard.getTile(row, col).openTile();
+	mineCell targetTile = m_gameBoard.getTile(row, col);
+	if (targetTile.getPlayerVisibility()) { return gameStateValues::CONTINUE; }
+	targetTile.openTile();
+	if (targetTile.getMineState()) { return gameStateValues::LOSE; }
+	return gameStateValues::OPENTILE_SUCCESS;
 }
 
-void mineGame::flagTile(int row, int col)
+gameStateValues mineGame::flagTile(int row, int col)
 {
 	m_gameBoard.getTile(row, col).flagTile();
+	return gameStateValues::CONTINUE;
 }
 
-void mineGame::qmarkTile(int row, int col)
+gameStateValues mineGame::qmarkTile(int row, int col)
 {
 	m_gameBoard.getTile(row, col).qmarkTile();
+	return gameStateValues::CONTINUE;
 }
 
 parsedPlayerMove mineGame::getFirstMove()
@@ -188,6 +197,7 @@ parsedPlayerMove mineGame::getFirstMove()
 	do {
 		ppMove = getMove();
 		executePlayerMove(ppMove);
+		m_uncheckedSafeTileCount--;
 	} while (ppMove.instruction != 'o');
 	return ppMove;
 }
@@ -214,8 +224,6 @@ void mineGame::placeMines(parsedPlayerMove ppMove)
 		if (targetTile == bannedTile) {}
 		else { (*targetTile).placeMine(); placedCount++; }
 	}
-
-	renderGameState();
 }
 
 void mineGame::calculateTileHints()
@@ -236,13 +244,30 @@ void mineGame::calculateTileHints()
 		}
 		tileList[idx].setNumberOfNeighborMines(neighborCount);
 	}
-	renderGameState();
 }
 
 void mineGame::runGameLoop()
 {
+	gameStateValues gameStatusCode{ gameStateValues::CONTINUE };
 	while (true) {
-		executePlayerMove(getMove());
 		renderGameState();
+		gameStatusCode = executePlayerMove(getMove());
+		
+		if (gameStatusCode == gameStateValues::OPENTILE_SUCCESS) {
+			m_uncheckedSafeTileCount--;
+			if (m_uncheckedSafeTileCount == 0) {
+				gameStatusCode = gameStateValues::WIN;
+			}
+		}
+
+		if (gameStatusCode == gameStateValues::LOSE) {
+			std::cout << "\nYou stepped on a mine!\n\n";
+			break;
+		}
+
+		if (gameStatusCode == gameStateValues::WIN) {
+			std::cout << "\nYou won!\n\n";
+			break;
+		}
 	}
 }

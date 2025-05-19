@@ -18,12 +18,20 @@ struct parsedPlayerMove {
 	int col;
 };
 
+const enum class gameStateValues {
+	OPENTILE_SUCCESS,
+	CONTINUE,
+	LOSE,
+	WIN
+};
+
 class mineGame {
 private:
 	mineDifficulty::difficultyEnum m_difficulty;
 	int m_movesCount{ 0 };
 	int m_totalMineCount{};
 	int m_theoreticalMinesRemaining;
+	int m_uncheckedSafeTileCount{};
 
 	mineBoard setupBoard(mineDifficulty::setupValues setupValues);
 	mineBoard m_gameBoard;
@@ -39,12 +47,12 @@ private:
 	bool validateCol(std::string_view);
 	bool isValidColChar(std::string_view);
 	bool isInCharRange(const char, const char, const char);
-	void executePlayerMove(parsedPlayerMove);
+	gameStateValues executePlayerMove(parsedPlayerMove);
 
-	std::map<char, void(mineGame::*)(int, int)> m_instructionDispatch;
-	void openTile(int, int);
-	void flagTile(int, int);
-	void qmarkTile(int, int);
+	std::map<char, gameStateValues(mineGame::*)(int, int)> m_instructionDispatch;
+	gameStateValues openTile(int, int);
+	gameStateValues flagTile(int, int);
+	gameStateValues qmarkTile(int, int);
 
 public:
 	mineGame(mineDifficulty::difficultyEnum difficulty) : m_difficulty{ difficulty }
@@ -85,6 +93,7 @@ public:
 			mineDifficulty::WIDTH.at(difficulty),
 			m_totalMineCount
 		};
+		m_uncheckedSafeTileCount = (s.boardHeight * s.boardWidth) - s.mineCount;
 
 		// Initialize the move instruction dispatch
 		m_instructionDispatch['o'] = &mineGame::openTile;
