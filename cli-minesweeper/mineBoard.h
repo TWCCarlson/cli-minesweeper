@@ -26,6 +26,8 @@ public:
 	const int getHeight() { return m_height; };
 	mineCell& getTile(int, int);
 	const int getMineCount() { return m_numberOfMines; };
-	std::vector<int> getValidNeighborIDX(int);
+	std::vector<int> getValidChebyshevNeighborIDX(int);
+	std::vector<int> getValidOrthogonalNeighborIDX(int);
 	bool isValidNeighbor(int, int);
+	void openTileChain(int, int);
 };

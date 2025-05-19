@@ -29,5 +29,7 @@ public:
 	void placeMine() { m_hasMine = true; m_isRevealed = true; };
 	const bool getMineState() const { return m_hasMine; };
 	void setNumberOfNeighborMines(int c) { m_numberOfNeighborMines = c; }
+	const int getNumberOfNeighborMines() const { return m_numberOfNeighborMines; }
 	bool getPlayerVisibility() { return m_isRevealed; };
+	bool isEmpty() { return (!m_hasMine && m_numberOfNeighborMines == 0); }
 };

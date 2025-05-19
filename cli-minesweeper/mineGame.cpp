@@ -60,7 +60,6 @@ parsedPlayerMove mineGame::getMove()
 		gotValidMove = validMoveInput(playerMove);
 	} while (!gotValidMove);
 	parsedPlayerMove pplayerMove{ parsePlayerMove(playerMove) };
-	std::cout << "[" << playerMove.row << ", " << playerMove.col << "]";
 	return pplayerMove;
 }
 
@@ -174,6 +173,10 @@ gameStateValues mineGame::openTile(int row, int col)
 	if (targetTile.getPlayerVisibility()) { return gameStateValues::CONTINUE; }
 	targetTile.openTile();
 	if (targetTile.getMineState()) { return gameStateValues::LOSE; }
+	// If a tile has no mine and no hint, it has no neighboring mines
+	// In minesweeper this means all adjacent tiles should be opened
+	// Essentially BFS/DFS where the stop condition is a hint
+	if (targetTile.getNumberOfNeighborMines() == 0) { m_gameBoard.openTileChain(row, col); }
 	return gameStateValues::OPENTILE_SUCCESS;
 }
 
@@ -196,7 +199,6 @@ parsedPlayerMove mineGame::getFirstMove()
 	do {
 		renderGameState();
 		ppMove = getMove();
-		executePlayerMove(ppMove);
 		m_uncheckedSafeTileCount--;
 	} while (ppMove.instruction != 'o');
 	return ppMove;
@@ -238,12 +240,17 @@ void mineGame::calculateTileHints()
 	std::vector<int> neighborsToCheck{};
 	for (int idx = 0; idx < tileList.size(); idx++) {
 		neighborCount = 0;
-		neighborsToCheck = m_gameBoard.getValidNeighborIDX(idx);
+		neighborsToCheck = m_gameBoard.getValidChebyshevNeighborIDX(idx);
 		for (int neighborIDX : neighborsToCheck) {
 			if (tileList[neighborIDX].getMineState()) { neighborCount++; }
 		}
 		tileList[idx].setNumberOfNeighborMines(neighborCount);
 	}
+}
+
+void mineGame::executeFirstMove(parsedPlayerMove ppMove)
+{
+	executePlayerMove(ppMove);
 }
 
 void mineGame::runGameLoop()

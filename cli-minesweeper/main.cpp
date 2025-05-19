@@ -60,16 +60,18 @@ int main() {
 
 	// Create the game instance
 	mineGame game{ difficultyLevel };
-	// Create the board
-	// Create the cells
+
 	// Await first move
 	parsedPlayerMove firstMove{ game.getFirstMove() };
+
 	// Disperse mines (avoid first revealed cell)
 	game.placeMines(firstMove);
 	game.calculateTileHints();
+
+	// Calculate effects of the first move
+	game.executeFirstMove(firstMove);
+
 	// Loop until game end
 	game.runGameLoop();
-	// - All non-mine cells revealed
-	// - Mine revealed
 	return 0;
 }
