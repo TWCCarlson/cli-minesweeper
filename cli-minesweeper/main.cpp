@@ -32,8 +32,8 @@ void introScreen() {
 }
 
 mineDifficulty::difficultyEnum selectDifficulty() {
+	int difficultyValue{};
 	while (true) {
-		int difficultyValue{ 0 };
 		std::cout << "Choose your difficulty level:\n\n";
 		for (auto [key, val] : mineDifficulty::DifficultyOptions) {
 			std::cout << key << ": " << val << '\n';
@@ -41,14 +41,17 @@ mineDifficulty::difficultyEnum selectDifficulty() {
 
 		std::cout << "\nEnter the corresponding number: ";
 		std::cin >> difficultyValue;
-
-		system("cls");
-		// Check the entered value exists in the map keys
-		if (mineDifficulty::DifficultyOptions.contains(difficultyValue)) {
-			return static_cast<mineDifficulty::difficultyEnum>(difficultyValue);
+		if (!std::cin.fail() && mineDifficulty::DifficultyOptions.contains(difficultyValue))
+		{
+			break;
 		}
+		std::cin.clear(); // Clear fail flag
+		std::cin.ignore();// Clear buffer
+		system("cls");
 	}
+	return static_cast<mineDifficulty::difficultyEnum>(difficultyValue);
 }
+
 
 int main() {
 	// Prompt user to set up the game
