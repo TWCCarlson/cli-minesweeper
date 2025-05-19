@@ -95,5 +95,6 @@ public:
 	}
 	parsedPlayerMove getFirstMove();
 	void placeMines(parsedPlayerMove);
+	void calculateTileHints();
 	void runGameLoop();
 };

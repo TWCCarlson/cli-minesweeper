@@ -20,10 +20,12 @@ public:
 		m_board(height* width, mineCell()) {
 	};
 	void displayBoard();
-	const std::vector<mineCell>& getBoard() { return m_board; };
+	std::vector<mineCell>& getBoard() { return m_board; };
 	std::vector<mineCell*> getCellPointers();
 	const int getWidth() { return m_width; };
 	const int getHeight() { return m_height; };
 	mineCell& getTile(int, int);
 	const int getMineCount() { return m_numberOfMines; };
+	std::vector<int> getValidNeighborIDX(int);
+	bool isValidNeighbor(int, int);
 };

@@ -63,6 +63,7 @@ int main() {
 	parsedPlayerMove firstMove{ game.getFirstMove() };
 	// Disperse mines (avoid first revealed cell)
 	game.placeMines(firstMove);
+	game.calculateTileHints();
 	// Loop until game end
 	//game.runGameLoop();
 	// - All non-mine cells revealed

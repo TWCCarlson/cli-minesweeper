@@ -21,7 +21,7 @@ mineBoard mineGame::setupBoard(mineDifficulty::setupValues setupValues)
 
 void mineGame::renderGameState()
 {
-	system("cls");
+	//system("cls");
 	printGameHeader();
 	m_gameBoard.displayBoard();
 	printGameInstructions();
@@ -197,7 +197,7 @@ void mineGame::placeMines(parsedPlayerMove ppMove)
 	// The board stores tiles in a vector
 	// It is sufficient to randomize the order of a vector of pointers
 	// Then select the first N pointers in the shuffled vector for mines
-	std::vector<mineCell*> shuffledTiles{m_gameBoard.getCellPointers()};
+	std::vector<mineCell*> shuffledTiles{ m_gameBoard.getCellPointers() };
 
 	// Set URBG (Uniform Random Number Generator)
 	std::random_device rd;
@@ -214,13 +214,35 @@ void mineGame::placeMines(parsedPlayerMove ppMove)
 		if (targetTile == bannedTile) {}
 		else { (*targetTile).placeMine(); placedCount++; }
 	}
+
+	renderGameState();
+}
+
+void mineGame::calculateTileHints()
+{
+	// Determine the 'hint' number for each tile
+	// The number is the count of mines in 8-neighbor adjacency
+	// Need to guard against exceeding vector bounds
+	// Need to guard against wrapping as the board is a vector
+	// but column 1 has no left-adjacent tiles
+	std::vector<mineCell>& tileList{ m_gameBoard.getBoard() };
+	int neighborCount{ 0 };
+	std::vector<int> neighborsToCheck{};
+	for (int idx = 0; idx < tileList.size(); idx++) {
+		neighborCount = 0;
+		neighborsToCheck = m_gameBoard.getValidNeighborIDX(idx);
+		for (int neighborIDX : neighborsToCheck) {
+			if (tileList[neighborIDX].getMineState()) { neighborCount++; }
+		}
+		tileList[idx].setNumberOfNeighborMines(neighborCount);
+	}
 	renderGameState();
 }
 
 void mineGame::runGameLoop()
 {
-	/*while (true) {
+	while (true) {
 		executePlayerMove(getMove());
 		renderGameState();
-	}*/
+	}
 }

@@ -27,4 +27,6 @@ public:
 	void flagTile() { m_playerMark = playerMark::Flag; }
 	void qmarkTile() { m_playerMark = playerMark::Question; }
 	void placeMine() { m_hasMine = true; m_isRevealed = true; };
+	const bool getMineState() const { return m_hasMine; };
+	void setNumberOfNeighborMines(int c) { m_numberOfNeighborMines = c; }
 };
