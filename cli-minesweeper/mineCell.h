@@ -33,11 +33,11 @@ private:
 
 public:
 	mineCell() : m_hasMine{} {};
-	void printCell(int colWidth);
+	void printCell(int colWidth, std::string colorMark = std::string("black"));
 	void openTile() { m_isRevealed = true; m_playerMark = playerMark::None; };
 	void flagTile() { m_playerMark = playerMark::Flag; }
 	void qmarkTile() { m_playerMark = playerMark::Question; }
-	void placeMine() { m_hasMine = true; m_isRevealed = true; };
+	void placeMine() { m_hasMine = true; };
 	const bool getMineState() const { return m_hasMine; };
 	void setNumberOfNeighborMines(int c) { m_numberOfNeighborMines = c; }
 	const int getNumberOfNeighborMines() const { return m_numberOfNeighborMines; }

@@ -4,26 +4,43 @@
 #include <iostream>
 #include <iomanip>
 
-void mineCell::printCell(int colWidth) {
+void mineCell::printCell(int colWidth, std::string colorMark) {
 	std::cout << std::setw(colWidth) << std::left;
 
-	if (!m_isRevealed)
-	{
-		std::cout << getPlayerMarkChar();
+	char outString{};
+	if (!m_isRevealed) { outString = getPlayerMarkChar(); }
+	else { outString = getGameMarkChar(); }
+
+	if (colorMark != "black") {
+		std::cout << dye::colorize(outString, colorMark).invert();
+	}
+	else if (hintColorMap.contains(outString)) {
+		std::string color{ hintColorMap.at(outString) };
+		//std::cout << dye::colorize(dye::colorize(outString, colorMark).invert(), color);
+		std::cout << dye::colorize(outString, color);
 	}
 	else {
-		char gameMarkChar{ getGameMarkChar() };
-		if (hintColorMap.contains(gameMarkChar)) {
-			std::string color{ hintColorMap.at(gameMarkChar) };
-			std::cout << dye::colorize(gameMarkChar, color);
-		}
-		else {
-			std::cout << (gameMarkChar);
-		}
+		std::cout << outString;
 	}
+
+
+	//if (!m_isRevealed)
+	//{
+	//	std::cout << getPlayerMarkChar();
+	//}
+	//else {
+	//	char gameMarkChar{ getGameMarkChar() };
+	//	if (hintColorMap.contains(gameMarkChar)) {
+	//		std::string color{ hintColorMap.at(gameMarkChar) };
+	//		std::cout << dye::colorize(gameMarkChar, color);
+	//	}
+	//	else {
+	//		std::cout << gameMarkChar;
+	//	}
+	//}
 }
 
-char mineCell::getPlayerMarkChar() {
+char mineCell::getPlayerMarkChar() {	
 	return playerMarkCharMap.at(m_playerMark);
 }
 

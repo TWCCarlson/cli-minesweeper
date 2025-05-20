@@ -19,11 +19,11 @@ mineBoard mineGame::setupBoard(mineDifficulty::setupValues setupValues)
 	return board;
 }
 
-void mineGame::renderGameState()
+void mineGame::renderGameState(int row, int col, std::string colorMark)
 {
 	system("cls");
 	printGameHeader();
-	m_gameBoard.displayBoard();
+	m_gameBoard.displayBoard(row, col, colorMark);
 	printGameInstructions();
 }
 
@@ -188,16 +188,22 @@ bool mineGame::checkIfWon()
 	return true;
 }
 
+void mineGame::revealMines()
+{
+	for (mineCell& tile : m_gameBoard.getBoard()) {
+		if (tile.getMineState()) { tile.openTile(); }
+	}
+}
+
 gameStateValues mineGame::openTile(int row, int col)
 {
 	mineCell& targetTile = m_gameBoard.getTile(row, col);
 
+	// If it has already been opened, skip
+	if (!targetTile.getPlayerVisibility()) { targetTile.openTile(); }
+
 	// If there is a mine there, lose	
 	if (targetTile.getMineState()) { return gameStateValues::LOSE; }
-
-	// If it has already been opened, skip
-	if (targetTile.getPlayerVisibility()) { return gameStateValues::CONTINUE; }
-	targetTile.openTile();
 
 	// If a tile has no mine and no hint, it has no neighboring mines
 	// In minesweeper this means all adjacent tiles should be opened
@@ -286,12 +292,17 @@ void mineGame::runGameLoop()
 	gameStateValues gameStatusCode{ gameStateValues::OPENTILE_SUCCESS };
 	while (true) {
 		checkTrackedValues();
+		renderGameState();
+		parsedPlayerMove ppMove = getMove();
+		gameStatusCode = executePlayerMove(ppMove);
 
 		if (gameStatusCode == gameStateValues::OPENTILE_SUCCESS) {
 			if (checkIfWon()) { gameStatusCode = gameStateValues::WIN; }
 		}
 
 		if (gameStatusCode == gameStateValues::LOSE) {
+			revealMines();
+			renderGameState(ppMove.row, ppMove.col, "red");
 			std::cout << "\nYou stepped on a mine!\n\n";
 			break;
 		}
@@ -302,7 +313,5 @@ void mineGame::runGameLoop()
 			break;
 		}
 
-		renderGameState();
-		gameStatusCode = executePlayerMove(getMove());
 	}
 }

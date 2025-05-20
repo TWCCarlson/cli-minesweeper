@@ -13,12 +13,17 @@ void mineBoard::printBoardHeader(int colWidth) {
 	std::cout << '\n';
 }
 
-void mineBoard::displayBoard() {
+void mineBoard::displayBoard(int row, int col, std::string color) {
 	mineBoard::printBoardHeader(2);
-	for (int y{ 0 }; y < m_height; y++) {
-		std::cout << std::setw(2) << std::right << y << " ";
-		for (int x{ 0 }; x < m_width; x++) {
-			m_board[y * m_width + x].printCell(2);
+	for (int r{ 0 }; r < m_height; r++) {
+		std::cout << std::setw(2) << std::right << r << " ";
+		for (int c{ 0 }; c < m_width; c++) {
+			if (r == row && c == col) {
+				m_board[r * m_width + c].printCell(2, color);
+			}
+			else {
+				m_board[r * m_width + c].printCell(2);
+			}
 		}
 		std::cout << '\n';
 	}

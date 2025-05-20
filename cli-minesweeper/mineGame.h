@@ -35,7 +35,7 @@ private:
 
 	mineBoard setupBoard(mineDifficulty::setupValues setupValues);
 	mineBoard m_gameBoard;
-	void renderGameState();
+	void renderGameState(int row=-1, int col=-1, std::string colorMark="black");
 	void printGameHeader();
 	void printGameInstructions();
 	parsedPlayerMove getMove();
@@ -50,6 +50,7 @@ private:
 	gameStateValues executePlayerMove(parsedPlayerMove);
 	void checkTrackedValues();
 	bool checkIfWon();
+	void revealMines();
 
 	std::map<char, gameStateValues(mineGame::*)(int, int)> m_instructionDispatch;
 	gameStateValues openTile(int, int);

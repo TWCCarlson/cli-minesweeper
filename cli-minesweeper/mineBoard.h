@@ -19,7 +19,7 @@ public:
 		m_numberOfMines{ mineCount },
 		m_board(height* width, mineCell()) {
 	};
-	void displayBoard();
+	void displayBoard(int row=-1, int col=-1, std::string color="");
 	std::vector<mineCell>& getBoard() { return m_board; };
 	std::vector<mineCell*> getCellPointers();
 	const int getWidth() { return m_width; };
