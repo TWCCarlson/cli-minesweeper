@@ -25,8 +25,10 @@ void mineBoard::displayBoard(int row, int col, std::string color) {
 				m_board[r * m_width + c].printCell(2);
 			}
 		}
+		std::cout << std::setw(2) << std::left << r;
 		std::cout << '\n';
 	}
+	mineBoard::printBoardHeader(2);
 }
 
 std::vector<mineCell*> mineBoard::getCellPointers()
