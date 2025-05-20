@@ -179,13 +179,19 @@ bool mineGame::checkIfWon()
 gameStateValues mineGame::openTile(int row, int col)
 {
 	mineCell& targetTile = m_gameBoard.getTile(row, col);
+
+	// If there is a mine there, lose	
+	if (targetTile.getMineState()) { return gameStateValues::LOSE; }
+
+	// If it has already been opened, skip
 	if (targetTile.getPlayerVisibility()) { return gameStateValues::CONTINUE; }
 	targetTile.openTile();
-	if (targetTile.getMineState()) { return gameStateValues::LOSE; }
+
 	// If a tile has no mine and no hint, it has no neighboring mines
 	// In minesweeper this means all adjacent tiles should be opened
 	// Essentially BFS/DFS where the stop condition is a hint
 	if (targetTile.getNumberOfNeighborMines() == 0) { m_gameBoard.openTileChain(row, col); }
+
 	return gameStateValues::OPENTILE_SUCCESS;
 }
 
