@@ -167,6 +167,15 @@ gameStateValues mineGame::executePlayerMove(parsedPlayerMove ppMove)
 	return result;
 }
 
+bool mineGame::checkIfWon()
+{
+	// If any tiles are not revealed except mines, no win
+	for (mineCell& tile : m_gameBoard.getBoard()) {
+		if (!tile.getPlayerVisibility() && !tile.getMineState()) { return false; }
+	}
+	return true;
+}
+
 gameStateValues mineGame::openTile(int row, int col)
 {
 	mineCell& targetTile = m_gameBoard.getTile(row, col);
@@ -255,16 +264,11 @@ void mineGame::executeFirstMove(parsedPlayerMove ppMove)
 
 void mineGame::runGameLoop()
 {
-	gameStateValues gameStatusCode{ gameStateValues::CONTINUE };
+	// First move is assured to be successful (unsafe?)
+	gameStateValues gameStatusCode{ gameStateValues::OPENTILE_SUCCESS };
 	while (true) {
-		renderGameState();
-		gameStatusCode = executePlayerMove(getMove());
-
 		if (gameStatusCode == gameStateValues::OPENTILE_SUCCESS) {
-			m_uncheckedSafeTileCount--;
-			if (m_uncheckedSafeTileCount == 0) {
-				gameStatusCode = gameStateValues::WIN;
-			}
+			if (checkIfWon()) { gameStatusCode = gameStateValues::WIN; }
 		}
 
 		if (gameStatusCode == gameStateValues::LOSE) {
@@ -273,8 +277,12 @@ void mineGame::runGameLoop()
 		}
 
 		if (gameStatusCode == gameStateValues::WIN) {
+			renderGameState(); // Show the winning board
 			std::cout << "\nYou won!\n\n";
 			break;
 		}
+
+		renderGameState();
+		gameStatusCode = executePlayerMove(getMove());
 	}
 }

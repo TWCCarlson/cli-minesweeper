@@ -48,6 +48,7 @@ private:
 	bool isValidColChar(std::string_view);
 	bool isInCharRange(const char, const char, const char);
 	gameStateValues executePlayerMove(parsedPlayerMove);
+	bool checkIfWon();
 
 	std::map<char, gameStateValues(mineGame::*)(int, int)> m_instructionDispatch;
 	gameStateValues openTile(int, int);
