@@ -1,4 +1,4 @@
-This is a quick little commandline interface implementation of minesweeper.
+This is a quick little **Windows-only** (sorry) commandline interface implementation of minesweeper.
 
 ![Pasted image 20250520124357](https://github.com/user-attachments/assets/07a2cf7a-866f-4857-85d7-e5db265a9d17)
 
