@@ -5,12 +5,14 @@
 namespace mineDifficulty
 {
 	const std::map<int, std::string> DifficultyOptions = {
+		{ -1, "Custom" },
 		{ 0, "Beginnner" },
 		{ 1, "Intermediate" },
 		{ 2, "Expert" }
 	};
 
 	const enum class difficultyEnum {
+		Custom = -1,
 		Beginner,
 		Intermediate,
 		Expert

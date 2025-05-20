@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+int getValidUserIntInput(int, int, std::string&);
+
 struct playerMove {
 	std::string instruction;
 	std::string row;
@@ -35,7 +37,7 @@ private:
 
 	mineBoard setupBoard(mineDifficulty::setupValues setupValues);
 	mineBoard m_gameBoard;
-	void renderGameState(int row=-1, int col=-1, std::string colorMark="black");
+	void renderGameState(int row = -1, int col = -1, std::string colorMark = "black");
 	void printGameHeader();
 	void printGameInstructions();
 	parsedPlayerMove getMove();
@@ -82,20 +84,35 @@ public:
 		//	mineCount_it->second
 		//};
 
-		if (!mineDifficulty::HEIGHT.contains(difficulty) ||
-			!mineDifficulty::WIDTH.contains(difficulty) ||
-			!mineDifficulty::MINECOUNT.contains(difficulty))
-		{
-			// ERR
+		mineDifficulty::setupValues s{};
+		int height{};
+		int width{};
+		int mineCount{};
+		if (difficulty == mineDifficulty::difficultyEnum::Custom) {
+			std::string heightPrompt{ "Input game board height " };
+			std::string widthPrompt{ "Input game board width " };
+			std::string mineCountPrompt{ "Input game mine count " };
+			height = getValidUserIntInput(2, 26, heightPrompt);
+			width = getValidUserIntInput(2, 26, widthPrompt);
+			mineCount = getValidUserIntInput(1, height * width - 1, mineCountPrompt);
 		}
+		else {
+			if (!mineDifficulty::HEIGHT.contains(difficulty) ||
+				!mineDifficulty::WIDTH.contains(difficulty) ||
+				!mineDifficulty::MINECOUNT.contains(difficulty))
+			{
+				// ERR
+			}
+			height = mineDifficulty::HEIGHT.at(difficulty);
+			width = mineDifficulty::WIDTH.at(difficulty);
+			mineCount = mineDifficulty::MINECOUNT.at(difficulty);
+		}
+		s.boardHeight = height;
+		s.boardWidth = width;
+		s.mineCount = mineCount;
 
-		m_totalMineCount = mineDifficulty::MINECOUNT.at(difficulty);
+		m_totalMineCount = mineCount;
 		m_theoreticalMinesRemaining = m_totalMineCount;
-		mineDifficulty::setupValues s{
-			mineDifficulty::HEIGHT.at(difficulty),
-			mineDifficulty::WIDTH.at(difficulty),
-			m_totalMineCount
-		};
 		m_uncheckedSafeTileCount = (s.boardHeight * s.boardWidth) - s.mineCount;
 
 		// Initialize the move instruction dispatch

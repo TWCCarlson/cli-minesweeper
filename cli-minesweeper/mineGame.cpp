@@ -10,6 +10,21 @@
 #include <random>
 #include <algorithm>
 
+int getValidUserIntInput(int min, int max, std::string& str) {
+	int userInput{};
+	do {
+		system("cls");
+		std::cout << str;
+		std::cout << '(' << min << '-' << max << "): ";
+		std::cin >> userInput;
+		if (!std::cin.fail()) {
+			std::cin.clear(); // Clear fail flag
+			std::cin.ignore();// Clear buffer
+		}
+	} while (userInput > max || userInput < min);
+	return userInput;
+}
+
 mineBoard mineGame::setupBoard(mineDifficulty::setupValues setupValues)
 {
 	mineBoard board(

@@ -41,7 +41,8 @@ mineDifficulty::difficultyEnum selectDifficulty() {
 
 		std::cout << "\nEnter the corresponding number: ";
 		std::cin >> difficultyValue;
-		if (!std::cin.fail() && mineDifficulty::DifficultyOptions.contains(difficultyValue))
+		if (!std::cin.fail() 
+			&& mineDifficulty::DifficultyOptions.contains(difficultyValue))
 		{
 			break;
 		}
