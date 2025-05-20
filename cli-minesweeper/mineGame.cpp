@@ -167,6 +167,18 @@ gameStateValues mineGame::executePlayerMove(parsedPlayerMove ppMove)
 	return result;
 }
 
+void mineGame::checkTrackedValues()
+{
+	int theoreticalMinesRemaining{ m_totalMineCount };
+	for (mineCell& tile : m_gameBoard.getBoard()) {
+		// Update remaining mine tally
+		if (!tile.getPlayerVisibility() && tile.getPlayerMark() == playerMark::Flag) {
+			theoreticalMinesRemaining--;
+		}
+		m_theoreticalMinesRemaining = theoreticalMinesRemaining;
+	}
+}
+
 bool mineGame::checkIfWon()
 {
 	// If any tiles are not revealed except mines, no win
@@ -273,6 +285,8 @@ void mineGame::runGameLoop()
 	// First move is assured to be successful (unsafe?)
 	gameStateValues gameStatusCode{ gameStateValues::OPENTILE_SUCCESS };
 	while (true) {
+		checkTrackedValues();
+
 		if (gameStatusCode == gameStateValues::OPENTILE_SUCCESS) {
 			if (checkIfWon()) { gameStatusCode = gameStateValues::WIN; }
 		}
