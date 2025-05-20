@@ -11,6 +11,17 @@ const enum class playerMark {
 
 extern const std::map<playerMark, char> playerMarkCharMap;
 
+const std::map<char, std::string> hintColorMap{
+	{'1', "light blue"},
+	{'2', "green"},
+	{'3', "red"},
+	{'4', "purple"},
+	{'5', "light red"},
+	{'6', "aqua"},
+	{'7', "light purple"},
+	{'8', "yellow"}
+};
+
 class mineCell {
 private:
 	bool m_hasMine{ false };

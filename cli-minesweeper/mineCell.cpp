@@ -1,4 +1,5 @@
 #include "mineCell.h"
+#include "color.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -11,7 +12,14 @@ void mineCell::printCell(int colWidth) {
 		std::cout << getPlayerMarkChar();
 	}
 	else {
-		std::cout << getGameMarkChar();
+		char gameMarkChar{ getGameMarkChar() };
+		if (hintColorMap.contains(gameMarkChar)) {
+			std::string color{ hintColorMap.at(gameMarkChar) };
+			std::cout << dye::colorize(gameMarkChar, color);
+		}
+		else {
+			std::cout << (gameMarkChar);
+		}
 	}
 }
 
