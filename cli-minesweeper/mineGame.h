@@ -126,5 +126,7 @@ public:
 	void placeMines(parsedPlayerMove);
 	void calculateTileHints();
 	void executeFirstMove(parsedPlayerMove);
+	void wonGame();
+	void lostGame(parsedPlayerMove);
 	void runGameLoop();
 };

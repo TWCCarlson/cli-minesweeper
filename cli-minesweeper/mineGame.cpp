@@ -301,11 +301,27 @@ void mineGame::executeFirstMove(parsedPlayerMove ppMove)
 	executePlayerMove(ppMove);
 }
 
+void mineGame::wonGame() {
+	renderGameState(); // Show the winning board
+	std::cout << "\nYou won!\n\n";
+}
+
+void mineGame::lostGame(parsedPlayerMove ppMove) {
+	revealMines();
+	renderGameState(ppMove.row, ppMove.col, "red");
+	std::cout << "\nYou stepped on a mine!\n\n";
+}
+
 void mineGame::runGameLoop()
 {
 	// First move is assured to be successful (unsafe?)
 	gameStateValues gameStatusCode{ gameStateValues::OPENTILE_SUCCESS };
-	while (true) {
+	// First move could result in a win
+	if (checkIfWon()) { gameStatusCode = gameStateValues::WIN ;wonGame(); }
+
+	// Otherwise play until lost or won
+	while (gameStatusCode != gameStateValues::LOSE
+		&& gameStatusCode != gameStateValues::WIN) {
 		checkTrackedValues();
 		renderGameState();
 		parsedPlayerMove ppMove = getMove();
@@ -314,19 +330,11 @@ void mineGame::runGameLoop()
 		if (gameStatusCode == gameStateValues::OPENTILE_SUCCESS) {
 			if (checkIfWon()) { gameStatusCode = gameStateValues::WIN; }
 		}
-
-		if (gameStatusCode == gameStateValues::LOSE) {
-			revealMines();
-			renderGameState(ppMove.row, ppMove.col, "red");
-			std::cout << "\nYou stepped on a mine!\n\n";
-			break;
-		}
-
-		if (gameStatusCode == gameStateValues::WIN) {
-			renderGameState(); // Show the winning board
-			std::cout << "\nYou won!\n\n";
-			break;
-		}
-
+		if (gameStatusCode == gameStateValues::LOSE) { lostGame(ppMove); }
+		if (gameStatusCode == gameStateValues::WIN) { wonGame(); }
 	}
+
+	std::cout << "Press enter to exit.";
+	std::cin.ignore();
+	std::getchar();
 }
